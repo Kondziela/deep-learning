@@ -1,1 +1,7 @@
-Project designed to test the capabilities of today's frameworks used for deep learning in various technologies.
+Project designed to test the capabilities of today's frameworks used for deep learning in various technologies and creation of easy to use schema to start with deep learning.
+Planed point:
+ - keras
+ - deeplearning4j
+ - TensorflowJS
+ - Synaptic
+ - integration keras with Floydhub
