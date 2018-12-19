@@ -12,6 +12,18 @@ def convert_label(label):
     buff[label] = 1
     return buff
 
+
+def create_metric_variables():
+    with tf.name_scope('losses'):
+        metric_variables = dict()
+        metric_variables['acc_train'] = tf.get_variable(shape=(), trainable=False, name='acc_train')
+        metric_variables['acc_test'] = tf.get_variable(shape=(), trainable=False, name='acc_test')
+
+        for name in metric_variables.keys():
+            tf.summary.scalar(name, metric_variables[name])
+
+        return metric_variables
+
 ###############
 
 # NN PARAMS
@@ -102,7 +114,11 @@ with tf.name_scope("ocena"):
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
+
 with tf.Session() as sess:
+    tb_writer = tf.summary.FileWriter('./tensorboard', sess.graph)
+    summary_variables = create_metric_variables()
+    merged_summaries = tf.summary.merge_all()
     init.run()
     for epoch in range(n_epochs):
         for iteration in range(x_train.shape[0] // batch_size):
@@ -112,6 +128,12 @@ with tf.Session() as sess:
         acc_test = accuracy.eval(feed_dict={X: x_test, Y: y_test})
 
         print(epoch, "Dokladnosc uczenia: ", acc_train, "Dokladnosc testowania: ", acc_test)
+
+        sess.run(summary_variables['acc_train'].assign(acc_train))
+        sess.run(summary_variables['acc_test'].assign(acc_test))
+
+        tb_writer.add_summary(sess.run(merged_summaries), global_step=epoch)
+        tb_writer.flush()
 
 
     save_path = saver.save(sess, './src/model/model_mnist.ckpt')
